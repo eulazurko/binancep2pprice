@@ -1,5 +1,6 @@
 package com.binance.p2p.price;
 
+import com.binance.p2p.price.cache.NotificationStatusManager;
 import com.binance.p2p.price.dto.P2PResponceEntryDto;
 import com.binance.p2p.price.notifications.NotificationService;
 import com.twilio.Twilio;
@@ -22,6 +23,9 @@ public class Launcher {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private NotificationStatusManager statusManager;
 
     @Value("${p2p.price}")
     private Double wished;
@@ -48,6 +52,7 @@ public class Launcher {
                 result.stream()
                         .filter(Objects::nonNull)
                         .filter(entry -> entry.getAdv().getPrice() <= wished)
+                        .filter(entry -> !statusManager.isAlreadySentNotification(entry))
                         .findFirst().ifPresent(notificationService::notifyMe);
 
                 Thread.sleep(sleep);
