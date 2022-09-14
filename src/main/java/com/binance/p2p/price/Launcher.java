@@ -16,8 +16,6 @@ import java.util.Objects;
 @Component
 public class Launcher {
     private static final Logger LOG = LoggerFactory.getLogger(Launcher.class);
-    private static final String ACCOUNT_SID = "AC6bc33d226ad06e1ebc8918c9c13ec5b5";
-    private static final String AUTH_TOKEN = "02687ce9331d80c382ff38c68e235afd";
 
     @Autowired
     private DataPullingService dataPullingService;
@@ -31,14 +29,19 @@ public class Launcher {
     @Value("${p2p.sleep}")
     private long sleep;
 
+    @Value("${p2p.twilio.account.sid}")
+    private String accountSid;
+
+    @Value("${p2p.twilio.auth.token}")
+    private String authToken;
+
     public static void main(String[] args) {
         AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
-        Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
-
         applicationContext.getBean(Launcher.class).launch();
     }
 
     private void launch() {
+        init();
         while (true) {
             try {
                 final List<P2PResponceEntryDto> result = dataPullingService.pull();
@@ -52,5 +55,9 @@ public class Launcher {
                 LOG.error("Failed", e);
             }
         }
+    }
+
+    private void init() {
+        Twilio.init(accountSid, authToken);
     }
 }
